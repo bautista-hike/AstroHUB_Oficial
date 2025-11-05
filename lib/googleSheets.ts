@@ -7,7 +7,15 @@ export async function getGoogleSheetsData() {
     const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
 
     if (!spreadsheetId || !serviceAccountEmail || !privateKey) {
-      throw new Error('Faltan credenciales de Google Sheets en .env.local');
+      const missing = [];
+      if (!spreadsheetId) missing.push('GOOGLE_SHEETS_SPREADSHEET_ID');
+      if (!serviceAccountEmail) missing.push('GOOGLE_SERVICE_ACCOUNT_EMAIL');
+      if (!privateKey) missing.push('GOOGLE_PRIVATE_KEY');
+      
+      throw new Error(
+        `Faltan credenciales de Google Sheets: ${missing.join(', ')}. ` +
+        `Configúralas en Vercel Dashboard → Settings → Environment Variables`
+      );
     }
 
     const auth = new google.auth.GoogleAuth({
@@ -140,7 +148,15 @@ export async function getCreativesData() {
     const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
 
     if (!spreadsheetId || !serviceAccountEmail || !privateKey) {
-      throw new Error('Faltan credenciales de Google Sheets en .env.local');
+      const missing = [];
+      if (!spreadsheetId) missing.push('GOOGLE_SHEETS_SPREADSHEET_ID');
+      if (!serviceAccountEmail) missing.push('GOOGLE_SERVICE_ACCOUNT_EMAIL');
+      if (!privateKey) missing.push('GOOGLE_PRIVATE_KEY');
+      
+      throw new Error(
+        `Faltan credenciales de Google Sheets: ${missing.join(', ')}. ` +
+        `Configúralas en Vercel Dashboard → Settings → Environment Variables`
+      );
     }
 
     const auth = new google.auth.GoogleAuth({
