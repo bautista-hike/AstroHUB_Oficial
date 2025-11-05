@@ -228,6 +228,8 @@ export function CampanasActivasSection() {
 
   const filtered = useMemo(() => {
     return rawData.filter((c: any) => {
+      // Filtrar campañas con costo mayor a cero
+      const hasCost = c.cost > 0
       const matchStage = stageFilter === "all" ? true : c.stage === stageFilter
       const matchActivity = activityFilter === "all" 
         ? true 
@@ -239,7 +241,7 @@ export function CampanasActivasSection() {
         c.product.toLowerCase().includes(searchQuery.toLowerCase()) ||
         c.platform.toLowerCase().includes(searchQuery.toLowerCase()) ||
         c.country.toLowerCase().includes(searchQuery.toLowerCase())
-      return matchStage && matchActivity && matchSearch
+      return hasCost && matchStage && matchActivity && matchSearch
     })
   }, [stageFilter, activityFilter, searchQuery, rawData])
 
