@@ -15,7 +15,10 @@ function detectPlatform(campaignName: string): string {
 
 // Función para detectar producto desde campaign_name
 function detectProduct(campaignName: string): string {
-  const name = campaignName.toUpperCase()
+  if (!campaignName) return 'Unknown'
+  const name = campaignName.toUpperCase().trim()
+  // Detectar PIX - debe estar primero para tener prioridad
+  if (name.includes('PIX')) return 'PIX Payments'
   if (name.includes('CURRENCYEX') || name.includes('CURRENCY_EXCHANGE')) return 'Currency Exchange'
   if (name.includes('GLOBALCARD') || name.includes('GLOBAL_CARD') || name.includes('GLOBAL-CARD')) return 'Global Card'
   if (name.includes('LOCALCARD') || name.includes('LOCAL_CARD')) return 'Local Card'
@@ -26,6 +29,10 @@ function detectProduct(campaignName: string): string {
 // Función para detectar etapa desde campaign_name
 function detectStage(campaignName: string): string {
   const name = campaignName.toUpperCase()
+  // Verificar si termina en BRAND, CATEGORY o COMPETITION
+  if (name.endsWith('BRAND') || name.endsWith('CATEGORY') || name.endsWith('COMPETITION')) {
+    return 'branding'
+  }
   if (name.includes('AWA') || name.includes('AWARENESS') || name.includes('REACH') || name.includes('VIEWS')) return 'awareness'
   if (name.includes('ENG') || name.includes('ENGAGEMENT')) return 'engagement'
   if (name.includes('SRC') || name.includes('BRAND') || name.includes('CATEGORY')) return 'search'

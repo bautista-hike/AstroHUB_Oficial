@@ -6,9 +6,9 @@ import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Search, ChevronDown, ChevronRight, Circle, X, Loader2 } from "lucide-react"
 
-type Stage = "all" | "awareness" | "search" | "app" | "engagement"
+type Stage = "all" | "awareness" | "search" | "app" | "engagement" | "branding"
 type Platform = "Google" | "Meta" | "TikTok" | "Apple" | "LinkedIn" | "Twitter"
-type Product = "Global Card" | "Local Card" | "USDT Payments" | "Currency Exchange"
+type Product = "Global Card" | "Local Card" | "USDT Payments" | "Currency Exchange" | "PIX Payments"
 type ActivityFilter = "all" | "active" | "inactive"
 
 interface Campaign {
@@ -40,6 +40,7 @@ const STAGE_LABELS: Record<Exclude<Stage, "all">, string> = {
   search: "Search",
   app: "App",
   engagement: "Engagement",
+  branding: "Branding",
 }
 
 // Función para detectar plataforma desde campaign_name
@@ -56,7 +57,10 @@ function detectPlatform(campaignName: string): string {
 
 // Función para detectar producto desde campaign_name
 function detectProduct(campaignName: string): string {
-  const name = campaignName.toUpperCase()
+  if (!campaignName) return 'Unknown'
+  const name = campaignName.toUpperCase().trim()
+  // Detectar PIX - debe estar primero para tener prioridad
+  if (name.includes('PIX')) return 'PIX Payments'
   if (name.includes('CURRENCYEX') || name.includes('CURRENCY_EXCHANGE')) return 'Currency Exchange'
   if (name.includes('GLOBALCARD') || name.includes('GLOBAL_CARD') || name.includes('GLOBAL-CARD')) return 'Global Card'
   if (name.includes('LOCALCARD') || name.includes('LOCAL_CARD')) return 'Local Card'
@@ -67,6 +71,10 @@ function detectProduct(campaignName: string): string {
 // Función para detectar etapa desde campaign_name
 function detectStage(campaignName: string): Exclude<Stage, "all"> {
   const name = campaignName.toUpperCase()
+  // Verificar si termina en BRAND, CATEGORY o COMPETITION
+  if (name.endsWith('BRAND') || name.endsWith('CATEGORY') || name.endsWith('COMPETITION')) {
+    return 'branding'
+  }
   if (name.includes('AWA') || name.includes('AWARENESS') || name.includes('REACH') || name.includes('VIEWS')) return 'awareness'
   if (name.includes('ENG') || name.includes('ENGAGEMENT')) return 'engagement'
   if (name.includes('SRC') || name.includes('BRAND') || name.includes('CATEGORY')) return 'search'
@@ -91,7 +99,7 @@ export function CampanasActivasSection() {
   const [activityFilter, setActivityFilter] = useState<ActivityFilter>("all")
   const [searchQuery, setSearchQuery] = useState("")
   const [expandedStages, setExpandedStages] = useState<Set<string>>(
-    new Set(["awareness", "search", "app", "engagement"]),
+    new Set(["awareness", "search", "app", "engagement", "branding"]),
   )
   const [expandedCountries, setExpandedCountries] = useState<Set<string>>(new Set())
   const [expandedPlatforms, setExpandedPlatforms] = useState<Set<string>>(new Set())
@@ -330,7 +338,7 @@ export function CampanasActivasSection() {
 
         {/* Stage Filter Buttons */}
         <div className="flex flex-wrap gap-3 mb-3">
-          {(["all", "awareness", "search", "app", "engagement"] as Stage[]).map((s) => (
+          {(["all", "awareness", "search", "app", "engagement", "branding"] as Stage[]).map((s) => (
             <button
               key={s}
               onClick={() => setStageFilter(s)}
