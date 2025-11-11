@@ -852,23 +852,10 @@ export function DashboardAnalytics() {
                 <h3 className="text-lg font-bold text-[#053634] mb-4">Funnel de Conversión</h3>
                 <div className="space-y-3">
                   {funnelData.map((step, index) => {
-                    // Calcular el ancho basado en el paso anterior, no en el total
-                    let widthPercentage = 100
-                    if (index === 0) {
-                      widthPercentage = 100 // Impressions siempre 100%
-                    } else {
-                      // Cada paso se muestra como porcentaje del paso anterior
-                      widthPercentage = step.percentage
-                    }
-                    
-                    const colors = [
-                      'bg-[#00DBBF]',
-                      'bg-[#053634]',
-                      'bg-[#3B82F6]',
-                      'bg-[#10B981]',
-                      'bg-[#8B5CF6]',
-                    ]
-                    
+                    const maxValue = funnelData[0]?.value || 0
+                    const widthPercentage = maxValue > 0 ? (step.value / maxValue) * 100 : 0
+                    const barColor = 'bg-[#00DBBF]'
+
                     return (
                       <div key={step.name} className="space-y-1.5">
                         <div className="flex items-center justify-between">
@@ -887,7 +874,7 @@ export function DashboardAnalytics() {
                             initial={{ width: 0 }}
                             animate={{ width: `${widthPercentage}%` }}
                             transition={{ duration: 0.8, delay: index * 0.1 }}
-                            className={`h-full ${colors[index]} rounded-lg`}
+                            className={`h-full ${barColor} rounded-lg`}
                           />
                         </div>
                       </div>
