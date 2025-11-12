@@ -485,6 +485,8 @@ export function DashboardAnalytics() {
     return steps
   })()
 
+  const maxFunnelValue = funnelData[0]?.value || 0
+
 
 
 
@@ -852,8 +854,11 @@ export function DashboardAnalytics() {
                 <h3 className="text-lg font-bold text-[#053634] mb-4">Funnel de Conversión</h3>
                 <div className="space-y-3">
                   {funnelData.map((step, index) => {
-                    const maxValue = funnelData[0]?.value || 0
-                    const widthPercentage = maxValue > 0 ? (step.value / maxValue) * 100 : 0
+                    const totalPercent = maxFunnelValue > 0 ? (step.value / maxFunnelValue) * 100 : 0
+                    const widthPercentage =
+                      maxFunnelValue > 0
+                        ? (Math.log(step.value + 1) / Math.log(maxFunnelValue + 1)) * 100
+                        : 0
                     const barColor = 'bg-[#00DBBF]'
 
                     return (
@@ -863,11 +868,9 @@ export function DashboardAnalytics() {
                             <span className="text-xs font-semibold text-[#053634] w-20">{step.name}</span>
                             <span className="text-xs text-gray-600">{formatNumber(step.value)}</span>
                           </div>
-                          {index > 0 && (
-                            <span className="text-xs font-medium text-[#00DBBF]">
-                              {formatPercent(step.percentage)}
-                            </span>
-                          )}
+                          <span className="text-xs font-medium text-[#00DBBF]">
+                            {formatPercent(totalPercent)}
+                          </span>
                         </div>
                         <div className="relative w-full h-6 bg-gray-100 rounded-lg overflow-hidden">
                           <motion.div
@@ -883,15 +886,16 @@ export function DashboardAnalytics() {
                 </div>
                 <div className="mt-4 pt-4 border-t border-gray-200">
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-center">
-                    {funnelData.map((step, index) => (
-                      <div key={step.name}>
-                        <p className="text-xs text-gray-600 mb-1">{step.name}</p>
-                        <p className="text-sm font-bold text-[#053634]">{formatNumber(step.value)}</p>
-                        {index > 0 && (
-                          <p className="text-xs text-[#00DBBF] mt-0.5">{formatPercent(step.percentage)}</p>
-                        )}
-                      </div>
-                    ))}
+                    {funnelData.map((step) => {
+                      const totalPercent = maxFunnelValue > 0 ? (step.value / maxFunnelValue) * 100 : 0
+                      return (
+                        <div key={step.name}>
+                          <p className="text-xs text-gray-600 mb-1">{step.name}</p>
+                          <p className="text-sm font-bold text-[#053634]">{formatNumber(step.value)}</p>
+                          <p className="text-xs text-[#00DBBF] mt-0.5">{formatPercent(totalPercent)}</p>
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
               </Card>
