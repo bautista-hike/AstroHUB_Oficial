@@ -1094,7 +1094,7 @@ export function DashboardAnalytics() {
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
             <Card className="p-6 rounded-2xl bg-white/95 backdrop-blur-sm shadow-lg">
-              <h3 className="text-xl font-bold text-[#053634] mb-6">Top Performers (por Installs)</h3>
+              <h3 className="text-xl font-bold text-[#053634] mb-6">Top Performers (por FTT)</h3>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
