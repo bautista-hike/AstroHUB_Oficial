@@ -432,7 +432,7 @@ export function DashboardAnalytics() {
         fttRate: campaign.accountsCreated > 0 ? (campaign.ftt / campaign.accountsCreated) * 100 : 0,
         convRate: campaign.installs > 0 ? (campaign.accountsCreated / campaign.installs) * 100 : 0,
       }))
-      .sort((a: any, b: any) => b.installs - a.installs)
+      .sort((a: any, b: any) => b.ftt - a.ftt)
       .slice(0, 10) // Top 10
   }
   

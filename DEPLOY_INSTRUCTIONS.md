@@ -17,7 +17,7 @@ git commit -m "Initial commit: AstroPay Hub"
 
 # Crear un repositorio en GitHub (ve a github.com y crea uno nuevo)
 # Luego conecta tu repositorio local con el remoto:
-git remote add origin https://github.com/TU-USUARIO/NOMBRE-REPO.git
+git remote add origin https://github.com/bautista-hike/AstroHUB_Oficial
 git branch -M main
 git push -u origin main
 ```
