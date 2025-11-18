@@ -502,6 +502,87 @@ export function DashboardAnalytics() {
     })
   }
 
+  // Función para exportar datos filtrados a CSV
+  const handleExportCSV = () => {
+    if (!rawData || rawData.length === 0) {
+      alert('No hay datos para exportar')
+      return
+    }
+
+    // Crear headers del CSV
+    const headers = [
+      'Date',
+      'Account ID',
+      'Account Name',
+      'Campaign ID',
+      'Campaign Name',
+      'Campaign Type',
+      'Source Medium',
+      'Channel Group',
+      'Country',
+      'Cost',
+      'Impressions',
+      'Clicks',
+      'Installs',
+      'Registration Complete',
+      'USD Savings Onboarding Completed',
+      'Local Card Payment Completed',
+      'Global Card Payment Completed',
+      'Currency Exchange Completed',
+      'Platform',
+      'FTT',
+      'Crypto Transfer'
+    ]
+
+    // Convertir datos a CSV
+    const csvRows = [
+      headers.join(','),
+      ...rawData.map((row: any) => [
+        row.date || '',
+        row.account_id || '',
+        row.account_name || '',
+        row.campaign_id || '',
+        row.campaign_name || '',
+        row.campaign_type || '',
+        row.source_medium || '',
+        row.channel_group || '',
+        row.country || '',
+        row.cost || 0,
+        row.impressions || 0,
+        row.clicks || 0,
+        row.installs || 0,
+        row.registration_complete || 0,
+        row.usd_savings_onboarding_completed || 0,
+        row.local_card_payment_completed || 0,
+        row.global_card_payment_completed || 0,
+        row.currency_exchange_completed || 0,
+        row.platform || '',
+        row.ftt || 0,
+        row.crypto_transfer || 0,
+      ].map(field => {
+        // Escapar comillas y envolver en comillas si contiene comas o comillas
+        const str = String(field)
+        if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+          return `"${str.replace(/"/g, '""')}"`
+        }
+        return str
+      }).join(','))
+    ]
+
+    // Crear blob y descargar
+    const csvContent = csvRows.join('\n')
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    
+    link.setAttribute('href', url)
+    link.setAttribute('download', `astropay-data-${new Date().toISOString().split('T')[0]}.csv`)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   const toggleProducto = (producto: string) => {
     setFilters((prev) => ({
       ...prev,
@@ -536,12 +617,16 @@ export function DashboardAnalytics() {
             <div className="flex gap-3">
               <Button
                 variant="outline"
+                onClick={handleExportCSV}
                 className="rounded-xl border-[#053634] text-[#053634] hover:bg-[#053634] hover:text-white bg-transparent"
               >
                 <Download className="w-4 h-4 mr-2" />
                 Exportar CSV
               </Button>
-              <Button className="bg-[#00DBBF] hover:bg-[#00DBBF]/90 text-white rounded-xl">
+              <Button 
+                onClick={() => window.open('https://lookerstudio.google.com/reporting/9f711ee7-6ef8-4029-981a-ba6d12e123a1', '_blank')}
+                className="bg-[#00DBBF] hover:bg-[#00DBBF]/90 text-white rounded-xl"
+              >
                 <ExternalLink className="w-4 h-4 mr-2" />
                 Abrir en Looker Studio
               </Button>
