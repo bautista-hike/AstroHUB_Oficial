@@ -6,9 +6,9 @@ import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Search, ChevronDown, ChevronRight, Circle, X, Loader2 } from "lucide-react"
 
-type Stage = "all" | "awareness" | "search" | "app" | "engagement" | "branding"
+type Stage = "all" | "awareness" | "search" | "app" | "engagement"
 type Platform = "Google" | "Meta" | "TikTok" | "Apple" | "LinkedIn" | "Twitter"
-type Product = "Global Card" | "Local Card" | "USDT Payments" | "Currency Exchange" | "PIX Payments"
+type Product = "Global Card" | "Local Card" | "USDT Payments" | "Currency Exchange" | "PIX Payments" | "Boost"
 type ActivityFilter = "all" | "active" | "inactive"
 
 interface Campaign {
@@ -40,7 +40,6 @@ const STAGE_LABELS: Record<Exclude<Stage, "all">, string> = {
   search: "Search",
   app: "App",
   engagement: "Engagement",
-  branding: "Branding",
 }
 
 // Función para detectar plataforma desde campaign_name
@@ -61,6 +60,7 @@ function detectProduct(campaignName: string): string {
   const name = campaignName.toUpperCase().trim()
   // Detectar PIX - debe estar primero para tener prioridad
   if (name.includes('PIX')) return 'PIX Payments'
+  if (name.includes('BOOST')) return 'Boost'
   if (name.includes('CURRENCYEX') || name.includes('CURRENCY_EXCHANGE')) return 'Currency Exchange'
   if (name.includes('GLOBALCARD') || name.includes('GLOBAL_CARD') || name.includes('GLOBAL-CARD')) return 'Global Card'
   if (name.includes('LOCALCARD') || name.includes('LOCAL_CARD')) return 'Local Card'
@@ -71,10 +71,6 @@ function detectProduct(campaignName: string): string {
 // Función para detectar etapa desde campaign_name
 function detectStage(campaignName: string): Exclude<Stage, "all"> {
   const name = campaignName.toUpperCase()
-  // Verificar si termina en BRAND, CATEGORY o COMPETITION
-  if (name.endsWith('BRAND') || name.endsWith('CATEGORY') || name.endsWith('COMPETITION')) {
-    return 'branding'
-  }
   if (name.includes('AWA') || name.includes('AWARENESS') || name.includes('REACH') || name.includes('VIEWS')) return 'awareness'
   if (name.includes('ENG') || name.includes('ENGAGEMENT')) return 'engagement'
   if (name.includes('SRC') || name.includes('BRAND') || name.includes('CATEGORY')) return 'search'
@@ -99,7 +95,7 @@ export function CampanasActivasSection() {
   const [activityFilter, setActivityFilter] = useState<ActivityFilter>("all")
   const [searchQuery, setSearchQuery] = useState("")
   const [expandedStages, setExpandedStages] = useState<Set<string>>(
-    new Set(["awareness", "search", "app", "engagement", "branding"]),
+    new Set(["awareness", "search", "app", "engagement"]),
   )
   const [expandedCountries, setExpandedCountries] = useState<Set<string>>(new Set())
   const [expandedPlatforms, setExpandedPlatforms] = useState<Set<string>>(new Set())
@@ -253,20 +249,40 @@ export function CampanasActivasSection() {
     })
   }, [stageFilter, activityFilter, searchQuery, rawData])
 
-  // Crear jerarquía: Stage -> Country -> Platform -> Product -> Campaigns
+  // Crear jerarquía: 
+  // Para search: Stage -> Country -> Campaigns
+  // Para otros: Stage -> Country -> Platform -> Product -> Campaigns
   const hierarchy = useMemo(() => {
-    const stages: Record<string, Record<string, Record<string, Record<string, any[]>>>> = {}
+    const stages: any = {}
 
     filtered.forEach((campaign: any) => {
-      if (!stages[campaign.stage]) stages[campaign.stage] = {}
-      if (!stages[campaign.stage][campaign.country]) stages[campaign.stage][campaign.country] = {}
-      if (!stages[campaign.stage][campaign.country][campaign.platform]) {
-        stages[campaign.stage][campaign.country][campaign.platform] = {}
+      if (!stages[campaign.stage]) {
+        // Para search, estructura simple: Country -> Campaigns[]
+        // Para otros, estructura completa: Country -> Platform -> Product -> Campaigns[]
+        stages[campaign.stage] = campaign.stage === 'search' 
+          ? {} as Record<string, any[]>
+          : {} as Record<string, Record<string, Record<string, any[]>>>
       }
-      if (!stages[campaign.stage][campaign.country][campaign.platform][campaign.product]) {
-        stages[campaign.stage][campaign.country][campaign.platform][campaign.product] = []
+      
+      if (campaign.stage === 'search') {
+        // Estructura simple para search: Country -> Campaigns[]
+        if (!stages[campaign.stage][campaign.country]) {
+          stages[campaign.stage][campaign.country] = []
+        }
+        stages[campaign.stage][campaign.country].push(campaign)
+      } else {
+        // Estructura completa para otros stages
+        if (!stages[campaign.stage][campaign.country]) {
+          stages[campaign.stage][campaign.country] = {}
+        }
+        if (!stages[campaign.stage][campaign.country][campaign.platform]) {
+          stages[campaign.stage][campaign.country][campaign.platform] = {}
+        }
+        if (!stages[campaign.stage][campaign.country][campaign.platform][campaign.product]) {
+          stages[campaign.stage][campaign.country][campaign.platform][campaign.product] = []
+        }
+        stages[campaign.stage][campaign.country][campaign.platform][campaign.product].push(campaign)
       }
-      stages[campaign.stage][campaign.country][campaign.platform][campaign.product].push(campaign)
     })
 
     return stages
@@ -338,7 +354,7 @@ export function CampanasActivasSection() {
 
         {/* Stage Filter Buttons */}
         <div className="flex flex-wrap gap-3 mb-3">
-          {(["all", "awareness", "search", "app", "engagement", "branding"] as Stage[]).map((s) => (
+          {(["all", "awareness", "search", "app", "engagement"] as Stage[]).map((s) => (
             <button
               key={s}
               onClick={() => setStageFilter(s)}
@@ -394,14 +410,19 @@ export function CampanasActivasSection() {
                     activa{countActiveInHierarchy(countries) !== 1 ? 's' : ''}
                   </Badge>
                   <Badge variant="outline" className="text-[#053634]">
-                    {Object.values(countries).reduce(
-                      (acc, platforms) =>
-                        acc + Object.values(platforms).reduce(
-                          (sum, products) => sum + Object.values(products).reduce((total, campaigns) => total + campaigns.length, 0),
-                          0
-                        ),
-                      0,
-                    )}{" "}
+                    {stage === 'search' 
+                      ? Object.values(countries as Record<string, any[]>).reduce((sum: number, campaigns: any[]) => {
+                          return sum + campaigns.length
+                        }, 0)
+                      : Object.values(countries as Record<string, Record<string, Record<string, any[]>>>).reduce(
+                          (acc: number, platforms: Record<string, Record<string, any[]>>) =>
+                            acc + Object.values(platforms).reduce(
+                              (sum: number, products: Record<string, any[]>) => sum + Object.values(products).reduce((total: number, campaigns: any[]) => total + campaigns.length, 0),
+                              0
+                            ),
+                          0,
+                        )
+                    }{" "}
                     total
                   </Badge>
                 </div>
@@ -416,8 +437,12 @@ export function CampanasActivasSection() {
                     exit={{ height: 0, opacity: 0 }}
                     className="border-t border-[#E6EFE8]"
                   >
-                    {Object.entries(countries).map(([country, platforms]) => {
+                    {Object.entries(countries as Record<string, any>).map(([country, platformsOrCampaigns]) => {
                       const countryKey = `${stage}-${country}`
+                      const isSearch = stage === 'search'
+                      const campaignsForSearch = isSearch ? (platformsOrCampaigns as any[]) : []
+                      const platformsForOther = !isSearch ? (platformsOrCampaigns as Record<string, Record<string, any[]>>) : null
+                      
                       return (
                         <div key={countryKey} className="border-b border-[#E6EFE8] last:border-b-0">
                           {/* Country Header */}
@@ -437,20 +462,26 @@ export function CampanasActivasSection() {
                             </div>
                             <div className="flex items-center gap-2">
                               <Badge className="bg-[#00DBBF]/10 text-[#053634] border-[#00DBBF]/30">
-                                {countActiveInHierarchy(platforms)}{" "}
-                                activa{countActiveInHierarchy(platforms) !== 1 ? 's' : ''}
+                                {isSearch 
+                                  ? countActiveCampaigns(campaignsForSearch)
+                                  : countActiveInHierarchy(platformsOrCampaigns)
+                                }{" "}
+                                activa{(isSearch ? countActiveCampaigns(campaignsForSearch) : countActiveInHierarchy(platformsOrCampaigns)) !== 1 ? 's' : ''}
                               </Badge>
                               <Badge variant="outline" className="text-[#053634]">
-                                {Object.values(platforms).reduce(
-                                  (sum, products) => sum + Object.values(products).reduce((total, campaigns) => total + campaigns.length, 0),
-                                  0
-                                )}{" "}
+                                {isSearch
+                                  ? campaignsForSearch.length
+                                  : platformsForOther ? Object.values(platformsForOther).reduce(
+                                      (sum: number, products: Record<string, any[]>) => sum + Object.values(products).reduce((total: number, campaigns: any[]) => total + campaigns.length, 0),
+                                      0
+                                    ) : 0
+                                }{" "}
                                 total
                               </Badge>
                             </div>
                           </button>
 
-                          {/* Platforms */}
+                          {/* Para search: mostrar campañas directamente, para otros: mostrar Platforms y Products */}
                           <AnimatePresence>
                             {expandedCountries.has(countryKey) && (
                               <motion.div
@@ -459,9 +490,51 @@ export function CampanasActivasSection() {
                                 exit={{ height: 0, opacity: 0 }}
                                 className="bg-[#F5F7F2]/30"
                               >
-                                {Object.entries(platforms).map(([platform, products]) => {
-                                  const platformKey = `${countryKey}-${platform}`
-                                  return (
+                                {isSearch ? (
+                                  // Para search: mostrar campañas directamente
+                                  <div className="p-3 pl-20 space-y-2">
+                                    {campaignsForSearch.map((campaign: any, index: number) => (
+                                      <motion.div
+                                        key={index}
+                                        whileHover={{ x: 4 }}
+                                        className="flex items-center justify-between p-3 rounded-lg bg-white hover:bg-[#F5F7F2] transition-colors cursor-pointer"
+                                        onClick={() => setSelectedCampaign(campaign)}
+                                      >
+                                        <div className="flex items-center gap-3 flex-1">
+                                          <div title={campaign.isActive ? 'Activa' : 'Inactiva'}>
+                                            <Circle 
+                                              className={`w-3 h-3 ${campaign.isActive ? 'text-[#00DBBF] fill-[#00DBBF]' : 'text-gray-400 fill-gray-400'}`}
+                                            />
+                                          </div>
+                                          <span className="font-medium text-[#053634]">{campaign.campaign_name}</span>
+                                          {!campaign.isActive && (
+                                            <Badge variant="outline" className="text-xs text-gray-500 border-gray-300">
+                                              Inactiva
+                                            </Badge>
+                                          )}
+                                        </div>
+                                        <div className="flex items-center gap-4 text-sm">
+                                          <div className="text-right">
+                                            <p className="text-xs text-gray-500">Cost</p>
+                                            <p className="font-semibold text-[#053634]">{formatCurrency(campaign.cost)}</p>
+                                          </div>
+                                          <div className="text-right">
+                                            <p className="text-xs text-gray-500">Installs</p>
+                                            <p className="font-semibold text-[#053634]">{formatNumber(campaign.installs)}</p>
+                                          </div>
+                                          <div className="text-right">
+                                            <p className="text-xs text-gray-500">Accounts</p>
+                                            <p className="font-semibold text-[#00DBBF]">{formatNumber(campaign.accountsCreated)}</p>
+                                          </div>
+                                        </div>
+                                      </motion.div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  // Para otros stages: mostrar estructura completa con Platforms y Products
+                                  platformsForOther ? Object.entries(platformsForOther).map(([platform, products]) => {
+                                    const platformKey = `${countryKey}-${platform}`
+                                    return (
                                     <div key={platformKey} className="border-t border-[#E6EFE8]">
                                       {/* Platform Header */}
                                       <button
@@ -589,9 +662,10 @@ export function CampanasActivasSection() {
                                           </motion.div>
                                         )}
                                       </AnimatePresence>
-                                    </div>
-                                  )
-                                })}
+                                      </div>
+                                    )
+                                  }) : null
+                                )}
                               </motion.div>
                             )}
                           </AnimatePresence>

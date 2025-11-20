@@ -19,6 +19,7 @@ function detectProduct(campaignName: string): string {
   const name = campaignName.toUpperCase().trim()
   // Detectar PIX - debe estar primero para tener prioridad
   if (name.includes('PIX')) return 'PIX Payments'
+  if (name.includes('BOOST')) return 'Boost'
   if (name.includes('CURRENCYEX') || name.includes('CURRENCY_EXCHANGE')) return 'Currency Exchange'
   if (name.includes('GLOBALCARD') || name.includes('GLOBAL_CARD') || name.includes('GLOBAL-CARD')) return 'Global Card'
   if (name.includes('LOCALCARD') || name.includes('LOCAL_CARD')) return 'Local Card'
