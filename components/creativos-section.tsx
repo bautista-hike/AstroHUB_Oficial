@@ -6,7 +6,10 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
-import { Filter, ChevronDown, ChevronRight, Loader2, TrendingUp, DollarSign, Users, MousePointerClick } from "lucide-react"
+import { ChevronDown, ChevronRight, Loader2, TrendingUp, DollarSign, Users, MousePointerClick } from "lucide-react"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 type FunnelStage = "all" | "awareness" | "app" | "engagement" | "search"
 type Country = "all" | "argentina" | "brasil"
@@ -72,9 +75,9 @@ const platformIcons: Record<string, string> = {
 
 export function CreativosSection() {
   const [funnelStage, setFunnelStage] = useState<FunnelStage>("all")
-  const [country, setCountry] = useState<Country>("all")
+  const [selectedCountries, setSelectedCountries] = useState<Country[]>(["all"])
   const [selectedProduct, setSelectedProduct] = useState<Product>("all")
-  const [selectedPlatform, setSelectedPlatform] = useState<Platform>("all")
+  const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>(["all"])
   const [statusFilter, setStatusFilter] = useState<Status>("all")
   const [expandedCampaigns, setExpandedCampaigns] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
@@ -89,9 +92,9 @@ export function CreativosSection() {
   ]
 
   const countries = [
-    { id: "all" as Country, label: "Todos", flag: "🌎" },
-    { id: "argentina" as Country, label: "Argentina", flag: "🇦🇷" },
-    { id: "brasil" as Country, label: "Brasil", flag: "🇧🇷" },
+    { id: "all" as Country, label: "Todos" },
+    { id: "argentina" as Country, label: "Argentina" },
+    { id: "brasil" as Country, label: "Brasil" },
   ]
 
   const products = [
@@ -118,7 +121,9 @@ export function CreativosSection() {
         const params = new URLSearchParams()
         
         if (funnelStage !== "all") params.append('stage', funnelStage)
-        if (country !== "all") params.append('country', country)
+        if (!selectedCountries.includes("all")) {
+          selectedCountries.forEach((country) => params.append('country', country))
+        }
         if (selectedProduct !== "all") {
           const productMap: Record<string, string> = {
             "global-card": "Global Card",
@@ -128,7 +133,9 @@ export function CreativosSection() {
           }
           params.append('product', productMap[selectedProduct])
         }
-        if (selectedPlatform !== "all") params.append('platform', selectedPlatform)
+        if (!selectedPlatforms.includes("all")) {
+          selectedPlatforms.forEach((platform) => params.append('platform', platform))
+        }
         if (statusFilter !== "all") params.append('status', statusFilter)
 
         const response = await fetch(`/api/creatives?${params.toString()}`)
@@ -148,7 +155,45 @@ export function CreativosSection() {
     }
 
     fetchCreatives()
-  }, [funnelStage, country, selectedProduct, selectedPlatform, statusFilter])
+  }, [funnelStage, selectedCountries, selectedProduct, selectedPlatforms, statusFilter])
+
+  const toggleCountry = (value: Country) => {
+    setSelectedCountries((prev) => {
+      if (value === "all") return ["all"]
+      const withoutAll = prev.filter((item) => item !== "all")
+      if (withoutAll.includes(value)) {
+        const next = withoutAll.filter((item) => item !== value)
+        return next.length ? next : ["all"]
+      }
+      return [...withoutAll, value]
+    })
+  }
+
+  const togglePlatform = (value: Platform) => {
+    setSelectedPlatforms((prev) => {
+      if (value === "all") return ["all"]
+      const withoutAll = prev.filter((item) => item !== "all")
+      if (withoutAll.includes(value)) {
+        const next = withoutAll.filter((item) => item !== value)
+        return next.length ? next : ["all"]
+      }
+      return [...withoutAll, value]
+    })
+  }
+
+  const getSelectedLabel = <T extends string>(
+    selected: T[],
+    options: { id: T; label: string }[],
+    placeholder: string,
+    allValue: T,
+  ) => {
+    if (selected.includes(allValue) || selected.length === 0) return placeholder
+    if (selected.length === 1) {
+      const match = options.find((opt) => opt.id === selected[0])
+      return match?.label ?? placeholder
+    }
+    return `${selected.length} seleccionados`
+  }
 
   const toggleCampaign = (campaignName: string) => {
     const newSet = new Set(expandedCampaigns)
@@ -221,41 +266,70 @@ export function CreativosSection() {
         {/* Filters Row */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Country Filter */}
-          <div className="flex gap-2">
-            {countries.map((c) => (
-              <motion.button
-                key={c.id}
-                onClick={() => setCountry(c.id)}
-                className={`px-4 py-2 rounded-full font-semibold transition-all border text-sm ${
-                  country === c.id
-                    ? "bg-[#00DBBF] text-white shadow-md border-[#00DBBF]"
-                    : "bg-white text-[#053634] hover:bg-[#F5F7F2] shadow-sm border-[#E6EFE8]"
-                }`}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <span className="mr-1">{c.flag}</span>
-                {c.label}
-              </motion.button>
-            ))}
-          </div>
+          <Card className="p-4 rounded-2xl bg-white border border-[#E6EFE8] shadow-sm">
+            <p className="text-xs font-semibold text-[#053634]/70 mb-2">Países</p>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="w-full flex items-center justify-between rounded-xl border border-[#E6EFE8] px-4 py-2 text-left text-sm hover:border-[#00DBBF]"
+                >
+                  <span className="text-[#053634]">
+                    {getSelectedLabel(selectedCountries, countries, "Todos los países", "all")}
+                  </span>
+                  <ChevronDown className="w-4 h-4 text-[#053634]/60" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64">
+                <div className="space-y-2">
+                  {countries.map((c) => (
+                    <label key={c.id} className="flex items-center gap-3 text-sm text-[#053634]">
+                      <Checkbox
+                        checked={c.id === "all" ? selectedCountries.includes("all") : selectedCountries.includes(c.id)}
+                        onCheckedChange={() => toggleCountry(c.id)}
+                      />
+                      {c.label}
+                    </label>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+          </Card>
 
           {/* Platform Filter */}
-          <div className="flex gap-2 flex-wrap">
-            {platforms.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => setSelectedPlatform(p.id)}
-                className={`px-4 py-2 rounded-full font-semibold transition-all border text-sm ${
-                  selectedPlatform === p.id
-                    ? "bg-[#053634] text-white shadow-md"
-                    : "bg-white text-[#053634] hover:bg-[#F5F7F2] shadow-sm border-[#E6EFE8]"
-                }`}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
+          <Card className="p-4 rounded-2xl bg-white border border-[#E6EFE8] shadow-sm">
+            <p className="text-xs font-semibold text-[#053634]/70 mb-2">Medios / Plataformas</p>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="w-full flex items-center justify-between rounded-xl border border-[#E6EFE8] px-4 py-2 text-left text-sm hover:border-[#00DBBF]"
+                >
+                  <span className="text-[#053634]">
+                    {getSelectedLabel(selectedPlatforms, platforms, "Todas las plataformas", "all")}
+                  </span>
+                  <ChevronDown className="w-4 h-4 text-[#053634]/60" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64">
+                <div className="space-y-2">
+                  {platforms.map((p) => (
+                    <label key={p.id} className="flex items-center gap-3 text-sm text-[#053634]">
+                      <Checkbox
+                        checked={
+                          p.id === "all"
+                            ? selectedPlatforms.includes("all")
+                            : selectedPlatforms.includes(p.id)
+                        }
+                        onCheckedChange={() => togglePlatform(p.id)}
+                      />
+                      {p.label}
+                    </label>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+          </Card>
 
           {/* Product Filter */}
           <div className="flex gap-2 flex-wrap">
@@ -349,7 +423,7 @@ export function CreativosSection() {
                         </Badge>
                         {campaign.country && (
                           <Badge variant="outline" className="bg-gray-100 text-[#053634]">
-                            {campaign.country === "Argentina" ? "🇦🇷" : campaign.country === "Brasil" ? "🇧🇷" : ""} {campaign.country}
+                            {campaign.country}
                           </Badge>
                         )}
                       </div>

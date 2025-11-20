@@ -320,8 +320,8 @@ export function CampanasActivasSection() {
       >
         {/* Header */}
         <div>
-          <h1 className="text-4xl font-bold text-[#053634] mb-2">Campañas Activas</h1>
-          <p className="text-[#053634]/70">Estructura jerárquica de campañas por etapa, país, plataforma y producto</p>
+          <h1 className="text-4xl font-bold text-[#053634] mb-2">Campañas</h1>
+          <p className="text-[#053634]/70">Vista de campañas por etapa, país, plataforma y producto</p>
         </div>
 
         {/* Search Bar */}

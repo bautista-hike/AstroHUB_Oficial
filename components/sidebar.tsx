@@ -28,7 +28,7 @@ export function Sidebar({ activeSection, onSectionChange, scrolled, collapsed, o
   const navItems = [
     { id: "dashboard", label: "Dashboard", icon: BarChart3 },
     { id: "presupuesto", label: "Presupuesto", icon: DollarSign },
-    { id: "campanas", label: "Campañas activas", icon: Rocket },
+    { id: "campanas", label: "Campañas", icon: Rocket },
     { id: "reportes", label: "Reportes", icon: TrendingUp },
     { id: "trainings", label: "Trainings / Glosario", icon: GraduationCap },
     { id: "minutas", label: "Minutas", icon: FileText },

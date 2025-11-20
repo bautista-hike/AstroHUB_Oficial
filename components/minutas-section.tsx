@@ -7,6 +7,17 @@ import { Button } from "@/components/ui/button"
 import { Upload, FileText, ExternalLink } from "lucide-react"
 
 export function MinutasSection() {
+  const minutaDestacada = {
+    titulo: "Minuta – Reunión 24/10/2025",
+    descripcion: "Documento colaborativo con próximos pasos y acuerdos",
+    enlace: "https://docs.google.com/document/d/1lYRFc1nfdIOAn8opWtOFvUKDDGqVrhGkqPGXtD2cy-I/edit?usp=sharing",
+    fecha: "24/10/2025",
+    tema: "Seguimiento OKRs Q4",
+    responsable: "ABN · AstroPay",
+    proximosPasos: "Compartir roadmap final y validar dependencias del sprint 1",
+    estado: "en-curso",
+  }
+
   const minutas = [
     {
       fecha: "20/10/2025",
@@ -84,27 +95,52 @@ export function MinutasSection() {
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <Card className="p-6 rounded-2xl bg-gradient-to-r from-[#00DBBF]/10 to-[#053634]/10 border-2 border-[#00DBBF]/30 hover:shadow-lg transition-all">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-[#00DBBF] rounded-xl">
-                  <FileText className="w-6 h-6 text-white" />
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-[#00DBBF] rounded-xl">
+                    <FileText className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-[#053634] mb-1">{minutaDestacada.titulo}</h3>
+                    <p className="text-sm text-gray-600">{minutaDestacada.descripcion}</p>
+                  </div>
+                </div>
+                <Button asChild className="bg-[#053634] hover:bg-[#053634]/90 text-white rounded-xl">
+                  <a
+                    href={minutaDestacada.enlace}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2"
+                  >
+                    Abrir Documento
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Fecha</p>
+                  <p className="font-semibold text-[#053634]">{minutaDestacada.fecha}</p>
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-[#053634] mb-1">Minuta – Reunión 24/10/2025</h3>
-                  <p className="text-sm text-gray-600">Documento colaborativo con próximos pasos y acuerdos</p>
+                  <p className="text-sm text-gray-600 mb-1">Tema</p>
+                  <p className="font-semibold text-[#053634]">{minutaDestacada.tema}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Responsable</p>
+                  <p className="font-medium text-gray-700">{minutaDestacada.responsable}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Próximos Pasos</p>
+                  <p className="text-sm text-gray-700">{minutaDestacada.proximosPasos}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Estado</p>
+                  <Badge className={getEstadoColor(minutaDestacada.estado)}>{getEstadoLabel(minutaDestacada.estado)}</Badge>
                 </div>
               </div>
-              <Button asChild className="bg-[#053634] hover:bg-[#053634]/90 text-white rounded-xl">
-                <a
-                  href="https://docs.google.com/document/d/1lYRFc1nfdIOAn8opWtOFvUKDDGqVrhGkqPGXtD2cy-I/edit?usp=sharing"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2"
-                >
-                  Abrir Documento
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-              </Button>
             </div>
           </Card>
         </motion.div>
