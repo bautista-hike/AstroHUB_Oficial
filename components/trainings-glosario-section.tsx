@@ -234,9 +234,8 @@ El público guardado se construye mediante **segmentación por intereses, demogr
       date: "2025",
       duration: "Documento",
       link: "#",
-      type: "Documento y Video",
+      type: "Documento",
       hasContent: true,
-      videoUrl: "https://www.loom.com/share/59b40fb82c4e4184b7b1ed7f202cfbe5",
       content: `# **Guía paso a paso para subir videos a YouTube**
 
 **1. Ingresar a YouTube**
@@ -563,9 +562,8 @@ Luego avanzás a la configuración del anuncio.
       date: "2025",
       duration: "Documento",
       link: "#",
-      type: "Documento y Video",
+      type: "Documento",
       hasContent: true,
-      videoUrl: "https://www.loom.com/share/a34d72fc337a4f0c968edb4ce6708d53",
       content: `# **Guía paso a paso para implementar campañas de App Promotion en Meta**
 
 **1. Crear la campaña**
@@ -1275,36 +1273,6 @@ Configuracion de Ad:
             </DialogHeader>
             {selectedTraining !== null && (
               <div className="flex-1 overflow-y-auto px-6 py-4">
-                {/* Videos de Loom si existen */}
-                {(() => {
-                  const training = trainings[selectedTraining]
-                  const videos = training?.videoUrls || (training?.videoUrl ? [training.videoUrl] : [])
-                  
-                  if (videos.length === 0) return null
-                  
-                  return (
-                    <div className="mb-6 space-y-4">
-                      {videos.map((videoUrl, idx) => {
-                        const videoId = videoUrl.includes('/share/') 
-                          ? videoUrl.split('/share/')[1] 
-                          : videoUrl.split('/').pop() || ''
-                        const embedUrl = `https://www.loom.com/embed/${videoId}`
-                        return (
-                          <div key={idx} className="rounded-xl overflow-hidden shadow-lg bg-gray-100">
-                            <div className="relative pb-[56.25%] h-0">
-                              <iframe
-                                src={embedUrl}
-                                className="absolute top-0 left-0 w-full h-full border-0"
-                                allowFullScreen
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              />
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  )
-                })()}
                 {/* Contenido del documento */}
                 {trainings[selectedTraining]?.content && (() => {
                   const content = trainings[selectedTraining].content || ''
@@ -1468,6 +1436,41 @@ Configuracion de Ad:
                           </p>
                         )
                       })}
+                    </div>
+                  )
+                })()}
+                {/* Videos de Loom si existen - al final */}
+                {(() => {
+                  const training = trainings[selectedTraining]
+                  const videoUrls = (training as any)?.videoUrls
+                  const videoUrl = (training as any)?.videoUrl
+                  const videos = videoUrls || (videoUrl ? [videoUrl] : [])
+                  
+                  if (videos.length === 0) return null
+                  
+                  return (
+                    <div className="mt-8 pt-6 border-t border-gray-200">
+                      <h2 className="text-xl font-bold mb-4 text-[#053634]">Video tutorial</h2>
+                      <div className="space-y-4">
+                        {videos.map((videoUrl: string, idx: number) => {
+                          const videoId = videoUrl.includes('/share/') 
+                            ? videoUrl.split('/share/')[1] 
+                            : videoUrl.split('/').pop() || ''
+                          const embedUrl = `https://www.loom.com/embed/${videoId}`
+                          return (
+                            <div key={idx} className="rounded-xl overflow-hidden shadow-lg bg-gray-100">
+                              <div className="relative pb-[56.25%] h-0">
+                                <iframe
+                                  src={embedUrl}
+                                  className="absolute top-0 left-0 w-full h-full border-0"
+                                  allowFullScreen
+                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                />
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
                     </div>
                   )
                 })()}
