@@ -48,7 +48,7 @@ function detectPlatform(campaignName: string): string {
   if (name.includes('GG_') || name.includes('GOOGLE')) return 'Google'
   if (name.includes('FB_') || name.includes('FACEBOOK') || name.includes('META')) return 'Meta'
   if (name.includes('TK_') || name.includes('TIKTOK')) return 'TikTok'
-  if (name.includes('LI_') || name.includes('LINKEDIN')) return 'LinkedIn'
+  if (name.includes('LI_') || name.includes('LINKEDIN')|| name.includes('LIN_')) return 'LinkedIn'
   if (name.includes('AP_') || name.includes('APPLE') || name.includes('APL'))return 'Apple'
   if (name.includes('X_') || name.includes('TWITTER')) return 'Twitter'
   return 'Unknown'
@@ -232,6 +232,8 @@ export function CampanasActivasSection() {
 
   const filtered = useMemo(() => {
     return rawData.filter((c: any) => {
+      // Excluir campañas de LinkedIn
+      if (c.platform === 'LinkedIn') return false
       // Filtrar campañas con costo mayor a cero
       const hasCost = c.cost > 0
       const matchStage = stageFilter === "all" ? true : c.stage === stageFilter
@@ -507,25 +509,15 @@ export function CampanasActivasSection() {
                                             />
                                           </div>
                                           <span className="font-medium text-[#053634]">{campaign.campaign_name}</span>
-                                          {!campaign.isActive && (
+                                          {campaign.isActive ? (
+                                            <Badge className="bg-[#00DBBF]/10 text-[#00DBBF] border-[#00DBBF]/30 text-xs">
+                                              Activa
+                                            </Badge>
+                                          ) : (
                                             <Badge variant="outline" className="text-xs text-gray-500 border-gray-300">
                                               Inactiva
                                             </Badge>
                                           )}
-                                        </div>
-                                        <div className="flex items-center gap-4 text-sm">
-                                          <div className="text-right">
-                                            <p className="text-xs text-gray-500">Cost</p>
-                                            <p className="font-semibold text-[#053634]">{formatCurrency(campaign.cost)}</p>
-                                          </div>
-                                          <div className="text-right">
-                                            <p className="text-xs text-gray-500">Installs</p>
-                                            <p className="font-semibold text-[#053634]">{formatNumber(campaign.installs)}</p>
-                                          </div>
-                                          <div className="text-right">
-                                            <p className="text-xs text-gray-500">Accounts</p>
-                                            <p className="font-semibold text-[#00DBBF]">{formatNumber(campaign.accountsCreated)}</p>
-                                          </div>
                                         </div>
                                       </motion.div>
                                     ))}
@@ -630,25 +622,15 @@ export function CampanasActivasSection() {
                                                                   />
                                                                 </div>
                                                                 <span className="font-medium text-[#053634]">{campaign.campaign_name}</span>
-                                                                {!campaign.isActive && (
+                                                                {campaign.isActive ? (
+                                                                  <Badge className="bg-[#00DBBF]/10 text-[#00DBBF] border-[#00DBBF]/30 text-xs">
+                                                                    Activa
+                                                                  </Badge>
+                                                                ) : (
                                                                   <Badge variant="outline" className="text-xs text-gray-500 border-gray-300">
                                                                     Inactiva
                                                                   </Badge>
                                                                 )}
-                                                              </div>
-                                                              <div className="flex items-center gap-4 text-sm">
-                                                                <div className="text-right">
-                                                                  <p className="text-xs text-gray-500">Cost</p>
-                                                                  <p className="font-semibold text-[#053634]">{formatCurrency(campaign.cost)}</p>
-                                                                </div>
-                                                                <div className="text-right">
-                                                                  <p className="text-xs text-gray-500">Installs</p>
-                                                                  <p className="font-semibold text-[#053634]">{formatNumber(campaign.installs)}</p>
-                                                                </div>
-                                                                <div className="text-right">
-                                                                  <p className="text-xs text-gray-500">Accounts</p>
-                                                                  <p className="font-semibold text-[#00DBBF]">{formatNumber(campaign.accountsCreated)}</p>
-                                                                </div>
                                                               </div>
                                                             </motion.div>
                                                           ))}
@@ -709,7 +691,6 @@ export function CampanasActivasSection() {
                         {selectedCampaign.isActive ? "Activa" : "Inactiva"}
                       </Badge>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">{selectedCampaign.product}</p>
                   </div>
                   <button
                     onClick={() => setSelectedCampaign(null)}
@@ -719,30 +700,7 @@ export function CampanasActivasSection() {
                   </button>
                 </div>
 
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-sm text-gray-600">País</p>
-                    <p className="font-semibold text-[#053634]">
-                      {selectedCampaign.country === "Argentina" ? "🇦🇷" : selectedCampaign.country === "Brasil" ? "🇧🇷" : ""} {selectedCampaign.country}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Plataforma</p>
-                    <p className="font-semibold" style={{ color: platformColors[selectedCampaign.platform] || '#053634' }}>
-                      {selectedCampaign.platform}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Producto</p>
-                    <p className="font-semibold text-[#053634]">{selectedCampaign.product}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Etapa</p>
-                    <p className="font-semibold text-[#053634]">{STAGE_LABELS[selectedCampaign.stage as Exclude<Stage, "all">]}</p>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-gray-200">
+                <div className="pt-4">
                   <h4 className="font-semibold text-[#053634] mb-3">KPIs</h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center p-3 bg-[#F5F7F2] rounded-lg">
