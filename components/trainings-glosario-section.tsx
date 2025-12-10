@@ -1068,10 +1068,6 @@ Configuracion de Ad:
     return indexA - indexB
   })
 
-  // Debug: verificar que los datos se agrupan correctamente
-  console.log("Trainings agrupados por partner:", trainingsByPartner)
-  console.log("Partners ordenados:", sortedPartners)
-
   const glosario = [
     { term: "CTR", definition: "Click-Through Rate - Porcentaje de clics sobre impresiones" },
     { term: "CPC", definition: "Cost Per Click - Costo promedio por cada clic en el anuncio" },
