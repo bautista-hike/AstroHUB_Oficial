@@ -1068,6 +1068,13 @@ Configuracion de Ad:
     return indexA - indexB
   })
 
+  // Debug en producción
+  if (typeof window !== 'undefined') {
+    console.log('Trainings agrupados:', trainingsByPartner)
+    console.log('Partners ordenados:', sortedPartners)
+    console.log('Total trainings:', trainings.length)
+  }
+
   const glosario = [
     { term: "CTR", definition: "Click-Through Rate - Porcentaje de clics sobre impresiones" },
     { term: "CPC", definition: "Cost Per Click - Costo promedio por cada clic en el anuncio" },
