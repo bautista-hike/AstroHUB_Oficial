@@ -8,6 +8,7 @@ import { Search, FileText, BookOpen, X, Share2, PlayCircle } from "lucide-react"
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
 // Componente para manejar la imagen con fallback
 function ImageContainer({ src, alt }: { src: string; alt: string }) {
@@ -54,6 +55,7 @@ export function TrainingsGlosarioSection() {
       link: "#",
       type: "Documento y Video",
       hasContent: true,
+      partner: "Google Ads",
       videoUrl: "https://www.loom.com/share/4759ee14ca9045cca4a376b03dcc336f",
       content: `# **Guía paso a paso para crear una audiencia en Google Ads**
 
@@ -124,6 +126,7 @@ Una vez terminada la configuración:
       link: "#",
       type: "Documento y Video",
       hasContent: true,
+      partner: "Meta Ads",
       videoUrl: "https://www.loom.com/share/4ae02e1a2a374ba0aebc3d3f40400e6a",
       content: `# **Guía paso a paso para crear públicos en Meta Ads**
 
@@ -236,6 +239,7 @@ El público guardado se construye mediante **segmentación por intereses, demogr
       link: "#",
       type: "Documento",
       hasContent: true,
+      partner: "Google Ads",
       content: `# **Guía paso a paso para subir videos a YouTube**
 
 **1. Ingresar a YouTube**
@@ -309,6 +313,7 @@ El público guardado se construye mediante **segmentación por intereses, demogr
       link: "#",
       type: "Documento y Video",
       hasContent: true,
+      partner: "Google Ads",
       videoUrl: "https://www.loom.com/share/95874758e7cb4d3fa954e3b4ea37da85",
       videoUrls: ["https://www.loom.com/share/95874758e7cb4d3fa954e3b4ea37da85", "https://www.loom.com/share/18ec725b8ec34d9b927b44eecc2c7eba"],
       content: `# **Guía paso a paso para implementar campañas de Google App Campaigns**
@@ -496,6 +501,7 @@ Antes de publicar:
       link: "#",
       type: "Documento y Video",
       hasContent: true,
+      partner: "Google Ads",
       videoUrl: "https://www.loom.com/share/e797ef83da9649d49ae0d6e362caf08a",
       content: `# **Guía paso a paso para crear campañas de Search en Google Ads**
 
@@ -564,6 +570,7 @@ Luego avanzás a la configuración del anuncio.
       link: "#",
       type: "Documento",
       hasContent: true,
+      partner: "Meta Ads",
       content: `# **Guía paso a paso para implementar campañas de App Promotion en Meta**
 
 **1. Crear la campaña**
@@ -711,6 +718,7 @@ Si vas a usar más de un creativo:
       link: "#",
       type: "Documento",
       hasContent: true,
+      partner: "TikTok Ads",
       content: `# **Guía paso a paso para crear campañas de App en TikTok Ads**
 
 ---
@@ -864,6 +872,7 @@ Revisar toda la configuración y hacer clic en **Publish** para activar la campa
       link: "#",
       type: "Documento",
       hasContent: false,
+      partner: "Apple Search Ads",
     },
     {
       title: "Cómo implementar campañas de Video Views en X",
@@ -872,6 +881,7 @@ Revisar toda la configuración y hacer clic en **Publish** para activar la campa
       link: "#",
       type: "Documento",
       hasContent: true,
+      partner: "X Ads",
       content: `# Guía paso a paso para crear una campaña de **Video Views**
 
 ---
@@ -1033,8 +1043,30 @@ Configuracion de Ad:
       link: "#",
       type: "Documento",
       hasContent: false,
+      partner: "LinkedIn Ads",
     },
   ]
+
+  // Agrupar trainings por partner
+  const trainingsByPartner = trainings.reduce((acc, training) => {
+    const partner = training.partner || "Otros"
+    if (!acc[partner]) {
+      acc[partner] = []
+    }
+    acc[partner].push(training)
+    return acc
+  }, {} as Record<string, Array<typeof trainings[number]>>)
+
+  // Ordenar partners según el orden deseado
+  const partnerOrder = ["Google Ads", "Meta Ads", "Apple Search Ads", "X Ads", "TikTok Ads", "LinkedIn Ads"]
+  const sortedPartners = Object.keys(trainingsByPartner).sort((a, b) => {
+    const indexA = partnerOrder.indexOf(a)
+    const indexB = partnerOrder.indexOf(b)
+    if (indexA === -1 && indexB === -1) return a.localeCompare(b)
+    if (indexA === -1) return 1
+    if (indexB === -1) return -1
+    return indexA - indexB
+  })
 
   const glosario = [
     { term: "CTR", definition: "Click-Through Rate - Porcentaje de clics sobre impresiones" },
@@ -1088,54 +1120,80 @@ Configuracion de Ad:
         </div>
 
         {activeTab === "trainings" ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {trainings.map((training, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Card 
-                  className="p-6 rounded-2xl bg-white hover:shadow-lg transition-all group cursor-pointer"
-                  onClick={() => {
-                    if (training.hasContent && training.content) {
-                      setSelectedTraining(index)
-                    } else if (training.link !== "#") {
-                      window.open(training.link, "_blank")
-                    }
-                  }}
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 bg-[#00DBBF]/10 rounded-xl group-hover:bg-[#00DBBF] transition-colors relative">
-                      <FileText className="w-8 h-8 text-[#00DBBF] group-hover:text-white transition-colors" />
-                      {training.videoUrl && (
-                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center border-2 border-white">
-                          <PlayCircle className="w-3 h-3 text-white fill-white" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold text-[#053634] mb-2 group-hover:text-[#00DBBF] transition-colors">
-                        {training.title}
-                      </h3>
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-3 flex-wrap">
-                        <span>{training.date}</span>
-                        {training.type?.includes("Documento") && (
-                          <Badge className="bg-[#053634]/10 text-[#053634] text-xs">Documento</Badge>
-                        )}
-                        {training.type?.includes("Video") && training.videoUrl && (
-                          <Badge className="bg-blue-100 text-blue-700 border-blue-300 text-xs">Video</Badge>
-                        )}
+          <div className="space-y-4">
+            <Accordion type="multiple" defaultValue={sortedPartners} className="w-full">
+              {sortedPartners.map((partner) => {
+                const partnerTrainings = trainingsByPartner[partner]
+                const trainingIndices = partnerTrainings.map(t => trainings.indexOf(t))
+                
+                return (
+                  <AccordionItem key={partner} value={partner} className="border border-gray-200 rounded-xl mb-4 px-6 bg-white">
+                    <AccordionTrigger className="text-xl font-bold text-[#053634] hover:no-underline py-6">
+                      <div className="flex items-center gap-3">
+                        <span>{partner}</span>
+                        <Badge className="bg-[#00DBBF]/10 text-[#00DBBF] border-[#00DBBF]">
+                          {partnerTrainings.length} {partnerTrainings.length === 1 ? 'training' : 'trainings'}
+                        </Badge>
                       </div>
-                      {!training.hasContent && (
-                        <Badge className="bg-orange-100 text-orange-700 border-orange-300 text-xs">Sin contenido</Badge>
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-            ))}
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-4">
+                        {partnerTrainings.map((training, idx) => {
+                          const originalIndex = trainings.indexOf(training)
+                          return (
+                            <motion.div
+                              key={originalIndex}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: idx * 0.1 }}
+                            >
+                              <Card 
+                                className="p-6 rounded-2xl bg-white hover:shadow-lg transition-all group cursor-pointer"
+                                onClick={() => {
+                                  if (training.hasContent && training.content) {
+                                    setSelectedTraining(originalIndex)
+                                  } else if (training.link !== "#") {
+                                    window.open(training.link, "_blank")
+                                  }
+                                }}
+                              >
+                                <div className="flex items-start gap-4">
+                                  <div className="p-3 bg-[#00DBBF]/10 rounded-xl group-hover:bg-[#00DBBF] transition-colors relative">
+                                    <FileText className="w-8 h-8 text-[#00DBBF] group-hover:text-white transition-colors" />
+                                    {training.videoUrl && (
+                                      <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center border-2 border-white">
+                                        <PlayCircle className="w-3 h-3 text-white fill-white" />
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="flex-1">
+                                    <h3 className="text-lg font-bold text-[#053634] mb-2 group-hover:text-[#00DBBF] transition-colors">
+                                      {training.title}
+                                    </h3>
+                                    <div className="flex items-center gap-2 text-sm text-gray-600 mb-3 flex-wrap">
+                                      <span>{training.date}</span>
+                                      {training.type?.includes("Documento") && (
+                                        <Badge className="bg-[#053634]/10 text-[#053634] text-xs">Documento</Badge>
+                                      )}
+                                      {training.type?.includes("Video") && training.videoUrl && (
+                                        <Badge className="bg-blue-100 text-blue-700 border-blue-300 text-xs">Video</Badge>
+                                      )}
+                                    </div>
+                                    {!training.hasContent && (
+                                      <Badge className="bg-orange-100 text-orange-700 border-orange-300 text-xs">Sin contenido</Badge>
+                                    )}
+                                  </div>
+                                </div>
+                              </Card>
+                            </motion.div>
+                          )
+                        })}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                )
+              })}
+            </Accordion>
           </div>
         ) : (
           <div className="space-y-6">
