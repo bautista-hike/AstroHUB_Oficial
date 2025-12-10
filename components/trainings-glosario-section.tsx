@@ -1121,79 +1121,131 @@ Configuracion de Ad:
 
         {activeTab === "trainings" ? (
           <div className="space-y-4">
-            <Accordion type="multiple" defaultValue={sortedPartners} className="w-full">
-              {sortedPartners.map((partner) => {
-                const partnerTrainings = trainingsByPartner[partner]
-                const trainingIndices = partnerTrainings.map(t => trainings.indexOf(t))
-                
-                return (
-                  <AccordionItem key={partner} value={partner} className="border border-gray-200 rounded-xl mb-4 px-6 bg-white">
-                    <AccordionTrigger className="text-xl font-bold text-[#053634] hover:no-underline py-6">
-                      <div className="flex items-center gap-3">
-                        <span>{partner}</span>
-                        <Badge className="bg-[#00DBBF]/10 text-[#00DBBF] border-[#00DBBF]">
-                          {partnerTrainings.length} {partnerTrainings.length === 1 ? 'training' : 'trainings'}
-                        </Badge>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-4">
-                        {partnerTrainings.map((training, idx) => {
-                          const originalIndex = trainings.indexOf(training)
-                          return (
-                            <motion.div
-                              key={originalIndex}
-                              initial={{ opacity: 0, y: 20 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: idx * 0.1 }}
-                            >
-                              <Card 
-                                className="p-6 rounded-2xl bg-white hover:shadow-lg transition-all group cursor-pointer"
-                                onClick={() => {
-                                  if (training.hasContent && training.content) {
-                                    setSelectedTraining(originalIndex)
-                                  } else if (training.link !== "#") {
-                                    window.open(training.link, "_blank")
-                                  }
-                                }}
+            {sortedPartners.length > 0 ? (
+              <Accordion type="multiple" defaultValue={sortedPartners} className="w-full">
+                {sortedPartners.map((partner) => {
+                  const partnerTrainings = trainingsByPartner[partner]
+                  if (!partnerTrainings || partnerTrainings.length === 0) return null
+                  
+                  return (
+                    <AccordionItem key={partner} value={partner} className="border border-gray-200 rounded-xl mb-4 px-6 bg-white">
+                      <AccordionTrigger className="text-xl font-bold text-[#053634] hover:no-underline py-6">
+                        <div className="flex items-center gap-3">
+                          <span>{partner}</span>
+                          <Badge className="bg-[#00DBBF]/10 text-[#00DBBF] border-[#00DBBF]">
+                            {partnerTrainings.length} {partnerTrainings.length === 1 ? 'training' : 'trainings'}
+                          </Badge>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-4">
+                          {partnerTrainings.map((training, idx) => {
+                            const originalIndex = trainings.indexOf(training)
+                            return (
+                              <motion.div
+                                key={originalIndex}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: idx * 0.1 }}
                               >
-                                <div className="flex items-start gap-4">
-                                  <div className="p-3 bg-[#00DBBF]/10 rounded-xl group-hover:bg-[#00DBBF] transition-colors relative">
-                                    <FileText className="w-8 h-8 text-[#00DBBF] group-hover:text-white transition-colors" />
-                                    {training.videoUrl && (
-                                      <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center border-2 border-white">
-                                        <PlayCircle className="w-3 h-3 text-white fill-white" />
-                                      </div>
-                                    )}
-                                  </div>
-                                  <div className="flex-1">
-                                    <h3 className="text-lg font-bold text-[#053634] mb-2 group-hover:text-[#00DBBF] transition-colors">
-                                      {training.title}
-                                    </h3>
-                                    <div className="flex items-center gap-2 text-sm text-gray-600 mb-3 flex-wrap">
-                                      <span>{training.date}</span>
-                                      {training.type?.includes("Documento") && (
-                                        <Badge className="bg-[#053634]/10 text-[#053634] text-xs">Documento</Badge>
-                                      )}
-                                      {training.type?.includes("Video") && training.videoUrl && (
-                                        <Badge className="bg-blue-100 text-blue-700 border-blue-300 text-xs">Video</Badge>
+                                <Card 
+                                  className="p-6 rounded-2xl bg-white hover:shadow-lg transition-all group cursor-pointer"
+                                  onClick={() => {
+                                    if (training.hasContent && training.content) {
+                                      setSelectedTraining(originalIndex)
+                                    } else if (training.link !== "#") {
+                                      window.open(training.link, "_blank")
+                                    }
+                                  }}
+                                >
+                                  <div className="flex items-start gap-4">
+                                    <div className="p-3 bg-[#00DBBF]/10 rounded-xl group-hover:bg-[#00DBBF] transition-colors relative">
+                                      <FileText className="w-8 h-8 text-[#00DBBF] group-hover:text-white transition-colors" />
+                                      {training.videoUrl && (
+                                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center border-2 border-white">
+                                          <PlayCircle className="w-3 h-3 text-white fill-white" />
+                                        </div>
                                       )}
                                     </div>
-                                    {!training.hasContent && (
-                                      <Badge className="bg-orange-100 text-orange-700 border-orange-300 text-xs">Sin contenido</Badge>
-                                    )}
+                                    <div className="flex-1">
+                                      <h3 className="text-lg font-bold text-[#053634] mb-2 group-hover:text-[#00DBBF] transition-colors">
+                                        {training.title}
+                                      </h3>
+                                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-3 flex-wrap">
+                                        <span>{training.date}</span>
+                                        {training.type?.includes("Documento") && (
+                                          <Badge className="bg-[#053634]/10 text-[#053634] text-xs">Documento</Badge>
+                                        )}
+                                        {training.type?.includes("Video") && training.videoUrl && (
+                                          <Badge className="bg-blue-100 text-blue-700 border-blue-300 text-xs">Video</Badge>
+                                        )}
+                                      </div>
+                                      {!training.hasContent && (
+                                        <Badge className="bg-orange-100 text-orange-700 border-orange-300 text-xs">Sin contenido</Badge>
+                                      )}
+                                    </div>
                                   </div>
-                                </div>
-                              </Card>
-                            </motion.div>
-                          )
-                        })}
+                                </Card>
+                              </motion.div>
+                            )
+                          })}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  )
+                })}
+              </Accordion>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {trainings.map((training, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <Card 
+                      className="p-6 rounded-2xl bg-white hover:shadow-lg transition-all group cursor-pointer"
+                      onClick={() => {
+                        if (training.hasContent && training.content) {
+                          setSelectedTraining(index)
+                        } else if (training.link !== "#") {
+                          window.open(training.link, "_blank")
+                        }
+                      }}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="p-3 bg-[#00DBBF]/10 rounded-xl group-hover:bg-[#00DBBF] transition-colors relative">
+                          <FileText className="w-8 h-8 text-[#00DBBF] group-hover:text-white transition-colors" />
+                          {training.videoUrl && (
+                            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center border-2 border-white">
+                              <PlayCircle className="w-3 h-3 text-white fill-white" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-bold text-[#053634] mb-2 group-hover:text-[#00DBBF] transition-colors">
+                            {training.title}
+                          </h3>
+                          <div className="flex items-center gap-2 text-sm text-gray-600 mb-3 flex-wrap">
+                            <span>{training.date}</span>
+                            {training.type?.includes("Documento") && (
+                              <Badge className="bg-[#053634]/10 text-[#053634] text-xs">Documento</Badge>
+                            )}
+                            {training.type?.includes("Video") && training.videoUrl && (
+                              <Badge className="bg-blue-100 text-blue-700 border-blue-300 text-xs">Video</Badge>
+                            )}
+                          </div>
+                          {!training.hasContent && (
+                            <Badge className="bg-orange-100 text-orange-700 border-orange-300 text-xs">Sin contenido</Badge>
+                          )}
+                        </div>
                       </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                )
-              })}
-            </Accordion>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+            )}
           </div>
         ) : (
           <div className="space-y-6">
